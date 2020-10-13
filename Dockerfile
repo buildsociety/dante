@@ -1,17 +1,11 @@
-FROM alpine:3
+FROM --platform=${TARGETPLATFORM:-linux/amd64} alpine:latest
+ARG TARGETPLATFORM
 
 RUN set -x \
     # Runtime dependencies.
  && apk add --no-cache \
       dante-server \
-      curl \
-    # Install dumb-init (avoid PID 1 issues).
-    # https://github.com/Yelp/dumb-init
- && curl -Lo /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.1.3/dumb-init_1.1.3_amd64 \
- && chmod +x /usr/local/bin/dumb-init \
-    # Clean up.
- && rm -rf /tmp/* \
- && apk del --purge curl
+   && rm -rf /tmp/*
 
 # Default configuration
 COPY sockd.conf /etc/
@@ -20,5 +14,4 @@ USER sockd
 
 EXPOSE 1080
 
-ENTRYPOINT ["dumb-init"]
-CMD ["/usr/sbin/sockd"]
+ENTRYPOINT ["/usr/sbin/sockd"]
